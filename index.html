@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gerador RPA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --ink:#0f1a24;
+    --ink-2:#182633;
+    --ink-3:#25384a;
+    --paper:#f3f2ec;
+    --paper-deep:#ebe9e0;
+    --card:#fffefb;
+    --rule:#e1ddd0;
+    --rule-2:#d2cdbc;
+    --text:#1b2430;
+    --muted:#5c6672;
+    --muted-2:#8a9099;
+    --accent:#0c6e4f;
+    --accent-ink:#08432f;
+    --accent-soft:#e2efe8;
+    --brass:#9c7a3d;
+    --brass-soft:#f2e9d6;
+    --danger:#9c2b20;
+    --danger-soft:#f7e5e2;
+    --focus:#c98a2c;
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow: 0 1px 2px rgba(15,26,36,.04), 0 14px 32px -18px rgba(15,26,36,.22);
+  }
+
+  *{ box-sizing:border-box; }
+  html, body{ margin:0; padding:0; min-height:100%; }
+  body{
+    background:
+      radial-gradient(1200px 500px at 15% -8%, rgba(12,110,79,0.05), transparent 60%),
+      var(--paper);
+    color: var(--text);
+    font: 15.5px/1.6 'Public Sans', -apple-system, 'Segoe UI', sans-serif;
+  }
+  h1,h2,h3,.brand,.seal-word{ font-family:'Fraunces','Public Sans',serif; }
+  .mono, .val, .field input, .rec-num{ font-variant-numeric: tabular-nums; }
+  button, input, select, textarea{ font: inherit; }
+  :focus-visible{ outline:3px solid var(--focus); outline-offset:2px; border-radius:4px; }
+
+  @keyframes rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  .rise{ animation: rise .5s cubic-bezier(.2,.7,.2,1) both; }
+  .rise:nth-of-type(2){ animation-delay:.05s; }
+  .rise:nth-of-type(3){ animation-delay:.1s; }
+  .rise:nth-of-type(4){ animation-delay:.15s; }
+  @media (prefers-reduced-motion: reduce){ .rise{ animation:none; } * { transition:none !important; } }
+
+  .app{ display:grid; grid-template-columns:236px 1fr; align-items:start; }
+  @media (max-width:900px){ .app{ grid-template-columns:1fr; } }
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    grid-column:1/-1; display:flex; align-items:center; justify-content:space-between;
+    gap:16px; padding:20px 26px; border-bottom:1px solid var(--rule); flex-wrap:wrap;
+    background: linear-gradient(180deg, rgba(255,255,255,.5), transparent);
+  }
+  .brandmark{ display:flex; align-items:center; gap:13px; }
+  .seal{
+    width:42px; height:42px; border-radius:50%; flex:none;
+    background: radial-gradient(circle at 32% 28%, #12805c, var(--accent) 60%, var(--accent-ink) 100%);
+    display:flex; align-items:center; justify-content:center; color:#eafff3;
+    box-shadow: 0 2px 6px rgba(12,110,79,.35), inset 0 0 0 1px rgba(255,255,255,.25);
+    position:relative;
+  }
+  .seal::after{
+    content:''; position:absolute; inset:3px; border-radius:50%;
+    border:1px dashed rgba(234,255,243,.55);
+  }
+  .seal span{ font-family:'Fraunces',serif; font-weight:600; font-size:14px; }
+  .brand{ font-size:1.32rem; font-weight:600; margin:0; letter-spacing:-.01em; color:var(--ink); }
+  .brand small{ display:block; font-family:'Public Sans',sans-serif; font-weight:500; font-size:.74rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+  .stamp{
+    display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+    background:var(--brass-soft); color:#6b5325; font-size:.78rem; font-weight:700;
+    letter-spacing:.03em; padding:7px 13px; border-radius:999px; border:1px solid #e3d3a8;
+  }
+
+  /* ---------- side index ---------- */
+  .rail{ padding:26px 18px; position:sticky; top:0; }
+  @media (max-width:900px){ .rail{ position:static; padding:16px 20px 0; } }
+  .idx{ display:grid; gap:2px; position:relative; }
+  .idx a{
+    display:flex; align-items:center; gap:11px; text-decoration:none; color:var(--ink-3);
+    padding:10px 8px; border-radius:8px; font-size:.87rem; font-weight:600;
+    position:relative;
+  }
+  .idx a:hover{ background:var(--paper-deep); }
+  .idx a .dot{
+    width:20px; height:20px; border-radius:50%; border:1.5px solid var(--rule-2); background:var(--card);
+    display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:800; color:var(--muted); flex:none;
+  }
+  .idx a.final .dot{ border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+  @media (max-width:900px){ .idx{ grid-template-columns:repeat(3,1fr); gap:6px; } .idx a{ font-size:.78rem; padding:8px 6px; } }
+  @media (max-width:560px){ .idx{ grid-template-columns:1fr 1fr; } }
+  .rail-note{ margin-top:20px; font-size:.79rem; color:var(--muted-2); line-height:1.6; border-top:1px solid var(--rule); padding-top:14px; }
+  @media (max-width:900px){ .rail-note{ display:none; } }
+
+  /* ---------- main ---------- */
+  .main{ padding:26px 30px 10px; max-width:920px; }
+  @media (max-width:560px){ .main{ padding:18px 16px 4px; } }
+  .lede{ color:var(--muted); margin:6px 0 22px; max-width:58ch; font-size:.98rem; }
+
+  /* ---------- ledger strip ---------- */
+  .ledger{
+    display:grid; grid-template-columns:repeat(4,1fr); background:var(--card);
+    border:1px solid var(--rule); border-radius:var(--radius); box-shadow:var(--shadow);
+    margin-bottom:24px; overflow:hidden;
+  }
+  @media (max-width:640px){ .ledger{ grid-template-columns:1fr 1fr; } }
+  .ledger .cell{ padding:16px 18px; border-right:1px solid var(--rule); }
+  .ledger .cell:last-child{ border-right:0; }
+  @media (max-width:640px){ .ledger .cell:nth-child(2){ border-right:0; } .ledger .cell:nth-child(1),.ledger .cell:nth-child(2){ border-bottom:1px solid var(--rule); } }
+  .ledger .cell .label{ font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-2); font-weight:600; }
+  .ledger .cell strong{ display:block; font-size:1.5rem; margin-top:5px; font-weight:600; color:var(--ink); font-family:'Fraunces',serif; }
+  .ledger .cell.neg strong{ color:var(--danger); }
+  .ledger .cell.pos strong{ color:var(--accent); }
+
+  /* ---------- panels ---------- */
+  .panel{ background:var(--card); border:1px solid var(--rule); border-radius:var(--radius); box-shadow:var(--shadow); padding:22px 24px; margin-bottom:20px; scroll-margin-top:20px; }
+  .panel h2{ font-size:1.2rem; font-weight:600; margin:0 0 4px; display:flex; align-items:center; gap:11px; color:var(--ink); }
+  .panel h2 .step{
+    width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink);
+    font-family:'Public Sans',sans-serif; font-size:.76rem; font-weight:800;
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .panel .panel-sub{ color:var(--muted); font-size:.87rem; margin:0 0 16px; }
+
+  /* ---------- form ---------- */
+  .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:560px){ .grid,.grid3{ grid-template-columns:1fr; } }
+  .field{ display:grid; gap:6px; }
+  .field.full{ grid-column:1/-1; }
+  .field label{ font-weight:600; font-size:.85rem; color:var(--ink-3); }
+  .field input, .field select, .field textarea{
+    border:1px solid var(--rule-2); border-radius:8px; padding:9px 11px; background:#fff; color:var(--text);
+    width:100%; transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field textarea:focus{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); outline:none; }
+  .field textarea{ min-height:64px; resize:vertical; }
+  .checkbox-field{ display:flex; gap:9px; align-items:flex-start; margin-top:2px; }
+  .checkbox-field input{ margin-top:4px; accent-color:var(--accent); }
+  .checkbox-field label{ font-weight:600; font-size:.9rem; }
+  .hint{ font-weight:400; font-size:.8rem; color:var(--muted-2); }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    border:1px solid var(--rule-2); background:#fff; color:var(--text);
+    padding:9px 15px; border-radius:8px; font-weight:700; font-size:.86rem;
+    cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:all .15s;
+  }
+  .btn:hover{ border-color:var(--muted-2); }
+  .btn.primary{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .btn.primary:hover{ background:var(--ink-2); }
+  .btn.success{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn.success:hover{ background:var(--accent-ink); }
+  .btn.small{ padding:6px 11px; font-size:.79rem; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn svg{ width:14px; height:14px; flex:none; }
+  .btn.copied{ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); }
+
+  /* ---------- summary rows ---------- */
+  .sum-row{ display:flex; align-items:baseline; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--rule); font-size:.94rem; }
+  .sum-row:last-of-type{ border-bottom:0; }
+  .sum-row .lbl{ color:var(--muted); }
+  .sum-row .val{ font-weight:700; font-family:'Public Sans',sans-serif; }
+  .sum-row.neg .val{ color:var(--danger); }
+  .sum-row.total{ margin-top:6px; padding-top:16px; border-top:2px solid var(--ink); }
+  .sum-row.total .lbl{ color:var(--ink); font-weight:700; font-size:1rem; }
+  .sum-row.total .val{ color:var(--accent); font-weight:700; font-size:1.4rem; font-family:'Fraunces',serif; }
+  .pill{ display:inline-block; padding:2px 10px; border-radius:999px; background:var(--paper-deep); color:var(--muted); font-size:.75rem; font-weight:700; }
+
+  .notice{ background:var(--brass-soft); border-left:3px solid var(--brass); padding:12px 14px; border-radius:6px; margin-top:18px; font-size:.85rem; line-height:1.6; color:#5b451e; }
+
+  /* ---------- receipts ---------- */
+  .receipts-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .receipts-head h2{ margin:0; font-size:1.2rem; font-weight:600; color:var(--ink); }
+  .empty{ color:var(--muted); padding:26px 4px; text-align:center; font-size:.92rem; border:1px dashed var(--rule-2); border-radius:var(--radius); background:var(--card); }
+
+  .doc{
+    background:var(--card); border:1px solid var(--rule); border-radius:var(--radius);
+    box-shadow:var(--shadow); margin-top:14px; overflow:hidden; position:relative;
+  }
+  .doc::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); }
+  .doc-head{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; padding:14px 20px; border-bottom:1px solid var(--rule); background:linear-gradient(180deg,#fff,var(--paper)); }
+  .doc-head .tag{ font-weight:700; color:var(--ink-3); font-size:.85rem; letter-spacing:.01em; }
+  .doc-body{ padding:22px 24px 24px; }
+  .rec-title{ text-align:center; font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem; margin:0 0 16px; color:var(--ink); letter-spacing:.01em; }
+  .rec-body p{ margin:0 0 12px; font-size:.93rem; line-height:1.75; color:var(--text); }
+  .retain{ background:var(--paper); border:1px solid var(--rule); border-radius:9px; padding:12px 14px; margin:14px 0; font-size:.89rem; }
+  .retain div{ display:flex; justify-content:space-between; padding:3px 0; }
+  .retain .liq{ margin-top:7px; padding-top:9px; border-top:1px solid var(--rule-2); font-weight:800; color:var(--accent-ink); }
+  .sign{ margin-top:22px; font-size:.89rem; display:flex; align-items:center; gap:14px; }
+  .sign .line-wrap{ flex:1; }
+  .sign .line{ border-top:1px solid var(--muted-2); width:min(280px,100%); margin-bottom:6px; }
+  .mini-seal{ width:34px; height:34px; border-radius:50%; flex:none; border:1.5px solid var(--brass); opacity:.55; display:flex; align-items:center; justify-content:center; color:var(--brass); font-family:'Fraunces',serif; font-weight:700; font-size:.7rem; }
+
+  footer{ text-align:center; color:var(--muted-2); font-size:.82rem; margin:30px 0 20px; }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="masthead">
+    <div class="brandmark">
+      <div class="seal"><span>RPA</span></div>
+      <p class="brand">Gerador RPA<small>Recibo de pagamento autônomo</small></p>
+    </div>
+    <span class="stamp">Tabela IRRF 2026</span>
+  </div>
+
+  <aside class="rail">
+    <nav class="idx">
+      <a href="#pnl-contratante"><span class="dot">1</span>Contratante</a>
+      <a href="#pnl-prestador"><span class="dot">2</span>Prestador</a>
+      <a href="#pnl-servico"><span class="dot">3</span>Serviço</a>
+      <a href="#pnl-retencoes"><span class="dot">4</span>Retenções</a>
+      <a href="#pnl-recibos" class="final"><span class="dot">✓</span>Recibos</a>
+    </nav>
+    <p class="rail-note">Os dados do contratante e do prestador ficam salvos apenas neste navegador, prontos para o próximo recibo.</p>
+  </aside>
+
+  <main class="main">
+    <p class="lede">Calcula INSS, IRRF e valor líquido de serviços prestados por pessoa física, e monta o texto do recibo — mês a mês, pronto para assinar.</p>
+
+    <div class="ledger rise">
+      <div class="cell"><span class="label">Valor bruto</span><strong id="outBruto">R$ 0,00</strong></div>
+      <div class="cell neg"><span class="label">INSS retido</span><strong id="outInss">R$ 0,00</strong></div>
+      <div class="cell neg"><span class="label">IRRF retido</span><strong id="outIrrf">R$ 0,00</strong></div>
+      <div class="cell pos"><span class="label">Valor líquido</span><strong id="outLiquido">R$ 0,00</strong></div>
+    </div>
+
+    <div class="panel rise" id="pnl-contratante">
+      <h2><span class="step">1</span>Tomador do serviço (contratante)</h2>
+      <p class="panel-sub">Empresa ou pessoa jurídica que paga o serviço e retém os tributos.</p>
+      <div class="field full">
+        <label for="empNome">Razão social / nome</label>
+        <input type="text" id="empNome" placeholder="Ex.: Advocacia Modelo Ltda.">
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div class="field">
+          <label for="empCnpj">CNPJ / CPF</label>
+          <input type="text" id="empCnpj" placeholder="00.000.000/0000-00">
+        </div>
+        <div class="field">
+          <label for="empCidadeUf">Cidade / UF <span class="hint">(local do recibo)</span></label>
+          <input type="text" id="empCidadeUf" placeholder="Salvador/BA">
+        </div>
+        <div class="field full">
+          <label for="empEndereco">Endereço completo</label>
+          <input type="text" id="empEndereco" placeholder="Rua, número, bairro, cidade/UF, CEP">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel rise" id="pnl-prestador">
+      <h2><span class="step">2</span>Prestador do serviço (autônomo)</h2>
+      <p class="panel-sub">Pessoa física que presta o serviço e recebe o pagamento.</p>
+      <div class="field full">
+        <label for="presNome">Nome completo</label>
+        <input type="text" id="presNome" placeholder="Ex.: João da Silva Souza">
+      </div>
+      <div class="grid3" style="margin-top:14px">
+        <div class="field">
+          <label for="presCpf">CPF</label>
+          <input type="text" id="presCpf" placeholder="000.000.000-00">
+        </div>
+        <div class="field">
+          <label for="presPis">PIS / NIT</label>
+          <input type="text" id="presPis" placeholder="000.00000.00-0">
+        </div>
+        <div class="field">
+          <label for="presDep">Dependentes (IRRF)</label>
+          <input type="number" id="presDep" min="0" step="1" value="0">
+        </div>
+        <div class="field full">
+          <label for="presEndereco">Endereço</label>
+          <input type="text" id="presEndereco" placeholder="Rua, número, bairro, cidade/UF">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel rise" id="pnl-servico">
+      <h2><span class="step">3</span>Serviço e competência</h2>
+      <p class="panel-sub">Descreva o serviço e o período em que o recibo deve ser emitido.</p>
+      <div class="field full">
+        <label for="servDesc">Descrição do serviço prestado</label>
+        <textarea id="servDesc" placeholder="Ex.: Serviços de correspondente jurídico prestados no período">Serviços prestados no período</textarea>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div class="field">
+          <label for="valorBruto">Valor bruto mensal (R$)</label>
+          <input type="text" inputmode="decimal" id="valorBruto" placeholder="0,00">
+        </div>
+        <div class="field">
+          <label for="numInicial">Numeração inicial do recibo</label>
+          <input type="number" id="numInicial" min="1" step="1" value="1">
+        </div>
+      </div>
+      <div class="grid3" style="margin-top:14px">
+        <div class="field">
+          <label for="compIni">Competência inicial</label>
+          <input type="month" id="compIni">
+        </div>
+        <div class="field">
+          <label for="compFim">Competência final</label>
+          <input type="month" id="compFim">
+        </div>
+        <div class="field">
+          <label for="diaPag">Dia do pagamento</label>
+          <input type="number" id="diaPag" min="1" max="31" value="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel rise" id="pnl-retencoes">
+      <h2><span class="step">4</span>Retenções e resumo</h2>
+      <p class="panel-sub">ISS depende da legislação do município — confirme obrigatoriedade e alíquota com a prefeitura ou contador.</p>
+      <div class="checkbox-field">
+        <input type="checkbox" id="issAtivo">
+        <label for="issAtivo">Contratante retém ISS na fonte</label>
+      </div>
+      <div class="field" id="issRateWrap" hidden style="max-width:220px;margin-top:12px">
+        <label for="issAliquota">Alíquota do ISS (%)</label>
+        <input type="text" inputmode="decimal" id="issAliquota" placeholder="Ex.: 5,00" value="5,00">
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="sum-row"><span class="lbl">Valor bruto</span><span class="val" id="sumBruto">R$ 0,00</span></div>
+        <div class="sum-row neg"><span class="lbl">INSS retido <span class="pill">11% · teto R$ 932,31</span></span><span class="val" id="sumInss">− R$ 0,00</span></div>
+        <div class="sum-row"><span class="lbl">Base de cálculo do IRRF</span><span class="val" id="sumBase">R$ 0,00</span></div>
+        <div class="sum-row neg"><span class="lbl">IRRF retido <span class="pill" id="sumFaixa"></span></span><span class="val" id="sumIrrf">− R$ 0,00</span></div>
+        <div class="sum-row neg" id="rowIss" hidden><span class="lbl">ISS retido</span><span class="val" id="sumIss">− R$ 0,00</span></div>
+        <div class="sum-row total"><span class="lbl">Valor líquido</span><span class="val" id="sumLiquido">R$ 0,00</span></div>
+      </div>
+
+      <div class="notice">Cálculo estimado: tabela progressiva do IRRF 2026, redução mensal da Lei 15.270/2025 (isenção até R$ 5.000, redução decrescente até R$ 7.350) e teto do INSS de contribuinte individual (R$ 932,31). Confirme os valores com a contabilidade do cliente antes de reter.</div>
+    </div>
+
+    <div id="pnl-recibos">
+      <div class="receipts-head">
+        <h2>Recibos gerados <span class="pill" id="recCount"></span></h2>
+        <button class="btn success small" id="btnCopyAll">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copiar todos
+        </button>
+      </div>
+      <div id="receiptsList"></div>
+    </div>
+
+    <footer>Preencha os dados acima — os recibos são montados automaticamente para cada mês da competência escolhida.</footer>
+  </main>
+</div>
+<script>
+(function(){
+  "use strict";
+
+  // ---------- persistence (per-browser convenience only) ----------
+  var STORE_KEY = 'rpa-gerador-v1';
+  var persistFields = ['empNome','empCnpj','empCidadeUf','empEndereco','presEndereco'];
+  function loadStore(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return;
+      var data = JSON.parse(raw);
+      persistFields.forEach(function(id){
+        if(data[id] !== undefined){
+          var el = document.getElementById(id);
+          if(el) el.value = data[id];
+        }
+      });
+    }catch(e){ /* storage unavailable — ignore */ }
+  }
+  function saveStore(){
+    try{
+      var data = {};
+      persistFields.forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) data[id] = el.value;
+      });
+      localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    }catch(e){ /* storage unavailable — ignore */ }
+  }
+
+  // ---------- helpers ----------
+  function parseMoney(str){
+    if(!str) return 0;
+    var s = String(str).trim().replace(/[R$\s]/g,'');
+    if(s.indexOf(',') > -1){
+      s = s.replace(/\./g,'').replace(',', '.');
+    }
+    var n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+  }
+  function fmtMoney(n){
+    return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
+
+  // ---------- tax rules (2026) ----------
+  var INSS_ALIQUOTA = 0.11;
+  var INSS_TETO = 932.31;
+  var DEDUCAO_DEPENDENTE = 189.59;
+
+  function calcInss(bruto){
+    return round2(Math.min(bruto * INSS_ALIQUOTA, INSS_TETO));
+  }
+
+  function tabelaIrrf(base){
+    if(base <= 2428.80) return { valor: 0, faixa: 'isento' };
+    if(base <= 2826.65) return { valor: base*0.075 - 182.16, faixa: '7,5%' };
+    if(base <= 3751.05) return { valor: base*0.15  - 394.16, faixa: '15%' };
+    if(base <= 4664.68) return { valor: base*0.225 - 675.49, faixa: '22,5%' };
+    return { valor: base*0.275 - 908.73, faixa: '27,5%' };
+  }
+
+  function calcIrrf(bruto, inss, dependentes){
+    var base = Math.max(0, bruto - inss - dependentes*DEDUCAO_DEPENDENTE);
+    var tab = tabelaIrrf(base);
+    var irrf = tab.valor;
+    var faixaLabel = tab.faixa;
+
+    if(bruto <= 5000){
+      irrf = 0;
+      faixaLabel = 'isento (Lei 15.270/2025)';
+    } else if(bruto <= 7350){
+      var reducao = Math.max(0, 978.62 - 0.133145*bruto);
+      var antes = irrf;
+      irrf = Math.max(0, irrf - reducao);
+      if(irrf < antes) faixaLabel += ' · reduzido';
+    }
+    return { valor: round2(Math.max(0, irrf)), base: round2(base), faixa: faixaLabel };
+  }
+
+  // ---------- valor por extenso ----------
+  var UNI = ['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove'];
+  var TEENS = ['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  var TENS = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  var HUNS = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+
+  function trio(n){
+    if(n === 0) return '';
+    if(n === 100) return 'cem';
+    var c = Math.floor(n/100), r = n%100, parts = [];
+    if(c > 0) parts.push(HUNS[c]);
+    if(r > 0){
+      if(r < 10) parts.push(UNI[r]);
+      else if(r < 20) parts.push(TEENS[r-10]);
+      else {
+        var d = Math.floor(r/10), u = r%10;
+        parts.push(u > 0 ? TENS[d] + ' e ' + UNI[u] : TENS[d]);
+      }
+    }
+    return parts.join(' e ');
+  }
+
+  function intToWords(n){
+    if(n === 0) return 'zero';
+    var groups = [], x = n;
+    while(x > 0){ groups.push(x % 1000); x = Math.floor(x/1000); }
+    var words = [];
+    for(var i = groups.length-1; i >= 0; i--){
+      var val = groups[i];
+      if(val === 0) continue;
+      var w = trio(val);
+      if(i === 1) w += (val === 1 ? ' mil' : ' mil');
+      else if(i === 2) w += (val === 1 ? ' milhão' : ' milhões');
+      words.push(w);
+    }
+    if(words.length === 1) return words[0];
+    var last = words[words.length-1], rest = words.slice(0, -1);
+    var lastVal = groups[0];
+    var joiner = (lastVal > 0 && lastVal < 100) ? ' e ' : ', ';
+    return rest.join(', ') + joiner + last;
+  }
+
+  function valorExtenso(valor){
+    var inteiro = Math.floor(valor + 1e-6);
+    var centavos = Math.round((valor - inteiro) * 100);
+    var str = intToWords(inteiro) + (inteiro === 1 ? ' real' : ' reais');
+    if(centavos > 0){
+      str += ' e ' + intToWords(centavos) + (centavos === 1 ? ' centavo' : ' centavos');
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  // ---------- competência range ----------
+  var MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+  function monthRange(iniStr, fimStr){
+    if(!iniStr) return [];
+    var fim = fimStr || iniStr;
+    var iniParts = iniStr.split('-').map(Number), fimParts = fim.split('-').map(Number);
+    var y = iniParts[0], m = iniParts[1];
+    var yEnd = fimParts[0], mEnd = fimParts[1];
+    var out = [], guard = 0;
+    while((y < yEnd || (y === yEnd && m <= mEnd)) && guard < 36){
+      out.push({ y: y, m: m });
+      m++; if(m > 12){ m = 1; y++; }
+      guard++;
+    }
+    return out;
+  }
+
+  function daysInMonth(y, m){ return new Date(y, m, 0).getDate(); }
+
+  // ---------- copy to clipboard ----------
+  function copyText(text, btn){
+    function done(){
+      if(!btn) return;
+      var original = btn.dataset.label || btn.innerHTML;
+      btn.dataset.label = original;
+      btn.classList.add('copied');
+      btn.textContent = 'Copiado ✓';
+      setTimeout(function(){ btn.classList.remove('copied'); btn.innerHTML = original; }, 1600);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, done){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      done();
+    }catch(e){ /* ignore */ }
+  }
+
+  // ---------- render ----------
+  var $ = function(id){ return document.getElementById(id); };
+  var lastReceiptsText = [];
+
+  function render(){
+    var empNome = $('empNome').value.trim() || '[Razão social do contratante]';
+    var empCnpj = $('empCnpj').value.trim() || '[CNPJ/CPF]';
+    var empEndereco = $('empEndereco').value.trim() || '[endereço do contratante]';
+    var empCidadeUf = $('empCidadeUf').value.trim() || '[Cidade/UF]';
+
+    var presNome = $('presNome').value.trim() || '[Nome do prestador]';
+    var presCpf = $('presCpf').value.trim() || '[CPF]';
+    var presPis = $('presPis').value.trim() || '[PIS/NIT]';
+    var presEndereco = $('presEndereco').value.trim();
+    var dependentes = parseInt($('presDep').value, 10) || 0;
+
+    var servDesc = $('servDesc').value.trim() || 'prestação de serviços';
+    var bruto = round2(parseMoney($('valorBruto').value));
+    var diaPag = Math.min(31, Math.max(1, parseInt($('diaPag').value, 10) || 5));
+    var numInicial = Math.max(1, parseInt($('numInicial').value, 10) || 1);
+
+    var issAtivo = $('issAtivo').checked;
+    var issAliquota = parseMoney($('issAliquota').value);
+    $('issRateWrap').hidden = !issAtivo;
+
+    var inss = calcInss(bruto);
+    var irrfCalc = calcIrrf(bruto, inss, dependentes);
+    var iss = issAtivo ? round2(bruto * (issAliquota/100)) : 0;
+    var liquido = round2(bruto - inss - irrfCalc.valor - iss);
+
+    $('outBruto').textContent = fmtMoney(bruto);
+    $('outInss').textContent = fmtMoney(inss);
+    $('outIrrf').textContent = fmtMoney(irrfCalc.valor);
+    $('outLiquido').textContent = fmtMoney(liquido);
+
+    $('sumBruto').textContent = fmtMoney(bruto);
+    $('sumInss').textContent = '− ' + fmtMoney(inss);
+    $('sumBase').textContent = fmtMoney(irrfCalc.base);
+    $('sumIrrf').textContent = '− ' + fmtMoney(irrfCalc.valor);
+    $('sumFaixa').textContent = irrfCalc.faixa || '';
+    $('rowIss').hidden = !issAtivo;
+    if(issAtivo) $('sumIss').textContent = '− ' + fmtMoney(iss);
+    $('sumLiquido').textContent = fmtMoney(liquido);
+
+    // receipts
+    var months = monthRange($('compIni').value, $('compFim').value);
+    var list = $('receiptsList');
+    list.innerHTML = '';
+    lastReceiptsText = [];
+
+    if(months.length === 0 || bruto <= 0){
+      $('recCount').textContent = '';
+      $('btnCopyAll').disabled = true;
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = bruto <= 0
+        ? 'Informe o valor bruto do serviço para gerar os recibos.'
+        : 'Informe a competência (mês inicial e final) para gerar os recibos.';
+      list.appendChild(empty);
+      return;
+    }
+
+    $('recCount').textContent = months.length + (months.length === 1 ? ' mês' : ' meses');
+    $('btnCopyAll').disabled = false;
+
+    months.forEach(function(mo, idx){
+      var seq = String(numInicial + idx).padStart(3, '0') + '/' + mo.y;
+      var dia = Math.min(diaPag, daysInMonth(mo.y, mo.m));
+      var dataStr = String(dia).padStart(2,'0') + ' de ' + MESES[mo.m-1] + ' de ' + mo.y;
+      var competenciaStr = MESES[mo.m-1] + '/' + mo.y;
+
+      var texto =
+        'RECIBO DE PAGAMENTO A AUTÔNOMO (RPA) Nº ' + seq + '\n\n' +
+        'Recebi de ' + empNome + ', CNPJ/CPF nº ' + empCnpj + ', com endereço em ' + empEndereco + ', ' +
+        'a importância de ' + fmtMoney(bruto) + ' (' + valorExtenso(bruto) + '), referente a ' + servDesc + ', ' +
+        'relativa à competência de ' + competenciaStr + '.\n\n' +
+        'Sobre o valor bruto foram retidos, nos termos da legislação vigente:\n' +
+        '  INSS (contribuinte individual, 11%): ' + fmtMoney(inss) + '\n' +
+        '  IRRF: ' + fmtMoney(irrfCalc.valor) +
+        (issAtivo ? '\n  ISS (' + issAliquota.toLocaleString('pt-BR') + '%): ' + fmtMoney(iss) : '') +
+        '\n\nValor líquido recebido: ' + fmtMoney(liquido) + '\n\n' +
+        'Para maior clareza, firmo o presente recibo, dando plena e geral quitação quanto ao valor acima referido.\n\n' +
+        empCidadeUf + ', ' + dataStr + '.\n\n\n' +
+        '_______________________________________\n' +
+        presNome + '\n' +
+        'CPF: ' + presCpf + '   PIS/NIT: ' + presPis +
+        (presEndereco ? '\n' + presEndereco : '');
+
+      lastReceiptsText.push(texto);
+
+      var doc = document.createElement('div');
+      doc.className = 'doc';
+      doc.innerHTML =
+        '<div class="doc-head">' +
+          '<span class="tag">RPA Nº ' + seq + ' · ' + competenciaStr + '</span>' +
+          '<button class="btn small" type="button">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            'Copiar texto' +
+          '</button>' +
+        '</div>' +
+        '<div class="doc-body">' +
+          '<div class="rec-title">RECIBO DE PAGAMENTO A AUTÔNOMO — Nº ' + seq + '</div>' +
+          '<div class="rec-body">' +
+          '<p>Recebi de <strong>' + escapeHtml(empNome) + '</strong>, CNPJ/CPF nº <strong>' + escapeHtml(empCnpj) + '</strong>, ' +
+          'com endereço em ' + escapeHtml(empEndereco) + ', a importância de <strong>' + fmtMoney(bruto) + '</strong> ' +
+          '(' + escapeHtml(valorExtenso(bruto)) + '), referente a ' + escapeHtml(servDesc) + ', relativa à competência de ' +
+          '<strong>' + competenciaStr + '</strong>.</p>' +
+          '<div class="retain">' +
+            '<div><span>INSS retido (11%)</span><span>' + fmtMoney(inss) + '</span></div>' +
+            '<div><span>IRRF retido</span><span>' + fmtMoney(irrfCalc.valor) + '</span></div>' +
+            (issAtivo ? '<div><span>ISS retido (' + issAliquota.toLocaleString('pt-BR') + '%)</span><span>' + fmtMoney(iss) + '</span></div>' : '') +
+            '<div class="liq"><span>Valor líquido</span><span>' + fmtMoney(liquido) + '</span></div>' +
+          '</div>' +
+          '<p>Para maior clareza, firmo o presente recibo, dando plena e geral quitação quanto ao valor acima referido.</p>' +
+          '<p>' + escapeHtml(empCidadeUf) + ', ' + dataStr + '.</p>' +
+          '<div class="sign">' +
+            '<div class="line-wrap"><div class="line"></div>' +
+            escapeHtml(presNome) + '<br>' +
+            'CPF: ' + escapeHtml(presCpf) + '  ·  PIS/NIT: ' + escapeHtml(presPis) + '</div>' +
+            '<div class="mini-seal">OK</div>' +
+          '</div>' +
+          '</div>' +
+        '</div>';
+
+      var copyBtn = doc.querySelector('.doc-head button');
+      copyBtn.addEventListener('click', function(){ copyText(texto, copyBtn); });
+
+      list.appendChild(doc);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+
+  // ---------- wire up ----------
+  var ids = ['empNome','empCnpj','empCidadeUf','empEndereco','presNome','presCpf','presPis','presDep',
+             'presEndereco','servDesc','valorBruto','compIni','compFim','diaPag','numInicial','issAtivo','issAliquota'];
+  ids.forEach(function(id){
+    var el = $(id);
+    var evt = (el.type === 'checkbox') ? 'change' : 'input';
+    el.addEventListener(evt, function(){ saveStore(); render(); });
+  });
+
+  $('btnCopyAll').addEventListener('click', function(){
+    if(lastReceiptsText.length === 0) return;
+    copyText(lastReceiptsText.join('\n\n' + '—'.repeat(30) + '\n\n'), $('btnCopyAll'));
+  });
+
+  // defaults: current month → +3 months, matching a typical short-term contract
+  (function setDefaultDates(){
+    var now = new Date();
+    var pad = function(n){ return String(n).padStart(2,'0'); };
+    $('compIni').value = now.getFullYear() + '-' + pad(now.getMonth()+1);
+    var end = new Date(now.getFullYear(), now.getMonth()+3, 1);
+    $('compFim').value = end.getFullYear() + '-' + pad(end.getMonth()+1);
+  })();
+
+  loadStore();
+  render();
+})();
+</script>
+</body>
+</html>
