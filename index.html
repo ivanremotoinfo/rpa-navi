@@ -204,7 +204,8 @@
   .sign .line{ border-top:1px solid var(--muted-2); width:min(280px,100%); margin-bottom:6px; }
   .mini-seal{ width:34px; height:34px; border-radius:50%; flex:none; border:1.5px solid var(--brass); opacity:.55; display:flex; align-items:center; justify-content:center; color:var(--brass); font-family:'Fraunces',serif; font-weight:700; font-size:.7rem; }
 
-  footer{ text-align:center; color:var(--muted-2); font-size:.82rem; margin:30px 0 20px; }
+  footer{ text-align:center; color:var(--muted-2); font-size:.82rem; margin:30px 0 20px; line-height:1.7; }
+  footer .credit{ display:inline-block; margin-top:4px; font-weight:600; color:var(--muted); letter-spacing:.01em; }
 
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
 </style>
@@ -359,7 +360,10 @@
       <div id="receiptsList"></div>
     </div>
 
-    <footer>Preencha os dados acima — os recibos são montados automaticamente para cada mês da competência escolhida.</footer>
+    <footer>
+      Preencha os dados acima — os recibos são montados automaticamente para cada mês da competência escolhida.
+      <br><span class="credit">Desenvolvido por Ivan Carlos · @suporteadv</span>
+    </footer>
   </main>
 </div>
 <script>
