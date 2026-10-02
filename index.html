@@ -208,6 +208,16 @@
   footer .credit{ display:inline-block; margin-top:4px; font-weight:600; color:var(--muted); letter-spacing:.01em; }
 
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+
+  @media print{
+    body{ background:#fff !important; }
+    .app{ display:block !important; }
+    .rail, .masthead, .lede, .ledger, .panel, .receipts-head, footer{ display:none !important; }
+    .main{ padding:0 !important; max-width:none !important; }
+    .doc{ page-break-inside:avoid; break-inside:avoid; page-break-after:always; box-shadow:none !important; border:1px solid #ccc !important; }
+    .doc:last-child{ page-break-after:auto; }
+    .doc-head .btn{ display:none !important; }
+  }
 </style>
 </head>
 <body>
@@ -352,10 +362,16 @@
     <div id="pnl-recibos">
       <div class="receipts-head">
         <h2>Recibos gerados <span class="pill" id="recCount"></span></h2>
-        <button class="btn success small" id="btnCopyAll">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copiar todos
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn small" id="btnPrint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Imprimir
+          </button>
+          <button class="btn success small" id="btnCopyAll">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar todos
+          </button>
+        </div>
       </div>
       <div id="receiptsList"></div>
     </div>
@@ -695,6 +711,10 @@
   $('btnCopyAll').addEventListener('click', function(){
     if(lastReceiptsText.length === 0) return;
     copyText(lastReceiptsText.join('\n\n' + '—'.repeat(30) + '\n\n'), $('btnCopyAll'));
+  });
+
+  $('btnPrint').addEventListener('click', function(){
+    window.print();
   });
 
   // defaults: current month → +3 months, matching a typical short-term contract
